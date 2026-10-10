@@ -36,7 +36,7 @@ async def request_context_middleware(request: Request, call_next):
 # Middleware 2: Per-client rate limiting
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
-    if request.url.path == "/ping" and request.method == "GET":
+    if request.url.path in {"/ping", "/api/index"} and request.method == "GET":
         client_id = request.headers.get("X-Client-Id")
 
         if not client_id:
@@ -81,9 +81,18 @@ app.add_middleware(
 )
 
 
-@app.get("/ping")
-async def ping(request: Request):
+async def ping_response(request: Request):
     return {
         "email": "23f2004679@ds.study.iitm.ac.in",
         "request_id": request.state.request_id,
     }
+
+
+@app.get("/ping")
+async def ping(request: Request):
+    return await ping_response(request)
+
+
+@app.get("/api/index")
+async def vercel_ping(request: Request):
+    return await ping_response(request)
